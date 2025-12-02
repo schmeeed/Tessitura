@@ -1,0 +1,101 @@
+# ===========================
+# SQL + General Development .gitignore
+# ===========================
+
+# ---------------------------
+# OS-specific garbage files
+# ---------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------
+# Editor files
+# ---------------------------
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime
+*.sublime-workspace
+*.sublime-project
+
+# JetBrains
+.idea/
+*.iml
+
+# ---------------------------
+# Temporary / cache / logs
+# ---------------------------
+*.tmp
+*.temp
+*.log
+*.bak
+*.old
+*.cache
+~$*
+
+# ---------------------------
+# Exports / bulky files that don’t belong in Git
+# ---------------------------
+*.xlsx
+*.xls
+*.csv
+*.tsv
+*.json
+*.xml
+*.bak
+*.bacpac
+*.dacpac
+*.mdf
+*.ldf
+*.db
+*.sqlite
+*.dump
+*.zip
+*.gz
+*.tar
+*.7z
+
+# ---------------------------
+# Python (just in case you add analysis scripts)
+# ---------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+
+# ---------------------------
+# SQL client tools
+# ---------------------------
+*.sqlproj
+*.sqlpackage
+*.publish.xml
+*.sqlsettings
+*.sqlcmdvars
+
+# Connection files or credential stores from GUI tools
+*.tssc  # SSMS
+*.json.creds
+*.secrets
+connection.config
+connection.json
+
+# ---------------------------
+# Dont accidentally commit notes or temp scratchpads
+# ---------------------------
+scratch/
+notes/
+archive/
+*_notes.sql
+*_temp.sql
+scratchpad.sql
+
+# ---------------------------
+# Misc
+# ---------------------------
+*.swp
+*.swo
