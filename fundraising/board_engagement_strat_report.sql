@@ -1,17 +1,23 @@
-/**
+/*
  * Board Engagement Query
  * Tessitura v16.x
+ *
  * Purpose:
- *   Combines steps, activities, and events tables to look board members and their
- *   households engagement over the past month. 
+ *   Combines engagement activity across Steps, Special Activities, Event Extracts,
+ *   and Ticket History for Board members and their associated households.
+ *   Date window used throughout the query:
+ *     Start: first day of the previous calendar month (inclusive)
+ *     End:   first day of the current calendar month (exclusive)
+ *   This represents the full previous calendar month only.
  *
  * Author: Brian Ralston
  * Created: 2025-11-25
- * 
+ *
  * EDITS:
- * 2025-12-02 FOC - Added in group_cust_no/name using expanded household table
- * 
+ *   2025-12-02 FOC - Added group_cust_no / group_cust_name using expanded household logic
+ *   2025-12-17 BMR - Added in Performances to the report VS_ELEMENTS_TICKET_HISTORY and solidified date-window documentation across all UNION blocks, looks at previous month
  */
+
 
 WITH ETeam AS (
     SELECT *
@@ -487,6 +493,100 @@ Engagement AS (
     WHERE
         c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
         AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+UNION ALL
+
+SELECT
+    'VS_ELEMENTS_TICKET_HISTORY' AS source_table, --Board Individual
+    bh.customer_no AS customer_no,
+    bmdn.display_name_short AS customer,
+
+    CASE 
+        WHEN bh.BoardHH IS NOT NULL THEN bh.BoardHH
+        ELSE bh.customer_no
+    END AS group_cust_no,
+
+    CASE 
+        WHEN bh.BoardHH IS NOT NULL THEN hhdn.display_name
+        ELSE bmdn.display_name_short
+    END AS group_cust_name,
+
+    th.perf_dt AS date,
+    CAST(th.perf_code AS varchar(50)) AS type,
+    LTRIM(RTRIM(CONCAT(
+        ISNULL(th.perf_name, ''),
+        CASE WHEN th.theater_desc IS NULL OR LTRIM(RTRIM(th.theater_desc)) = '' THEN '' ELSE CONCAT(' - ', th.theater_desc) END,
+        CASE WHEN th.location    IS NULL OR LTRIM(RTRIM(th.location))    = '' THEN '' ELSE CONCAT(' - ', th.location)    END
+    ))) AS description,
+    CAST(NULL AS int) AS worker_no,
+    CAST(NULL AS varchar(200)) AS worker_name
+FROM VS_ELEMENTS_TICKET_HISTORY th
+INNER JOIN BoardHH bh
+    ON bh.customer_no = th.customer_no
+LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
+    ON bmdn.customer_no = bh.customer_no
+LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
+    ON hhdn.customer_no = bh.BoardHH
+WHERE
+    th.perf_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+    AND th.perf_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+UNION ALL
+
+SELECT
+    'VS_ELEMENTS_TICKET_HISTORY' AS source_table,--Board Household
+    bh.customer_no AS customer_no,
+    bmdn.display_name_short AS customer,
+
+    bh.BoardHH AS group_cust_no,
+    hhdn.display_name AS group_cust_name,
+
+    th.perf_dt AS date,
+    CAST(th.perf_code AS varchar(50)) AS type,
+    LTRIM(RTRIM(CONCAT(
+        ISNULL(th.perf_name, ''),
+        CASE WHEN th.theater_desc IS NULL OR LTRIM(RTRIM(th.theater_desc)) = '' THEN '' ELSE CONCAT(' - ', th.theater_desc) END,
+        CASE WHEN th.location    IS NULL OR LTRIM(RTRIM(th.location))    = '' THEN '' ELSE CONCAT(' - ', th.location)    END
+    ))) AS description,
+    CAST(NULL AS int) AS worker_no,
+    CAST(NULL AS varchar(200)) AS worker_name
+FROM VS_ELEMENTS_TICKET_HISTORY th
+INNER JOIN BoardHH bh
+    ON bh.BoardHH = th.customer_no
+LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
+    ON bmdn.customer_no = bh.customer_no
+LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
+    ON hhdn.customer_no = bh.BoardHH
+WHERE
+    th.perf_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+    AND th.perf_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+UNION ALL
+
+SELECT
+    'VS_ELEMENTS_TICKET_HISTORY' AS source_table, --Board Primary Affiliate
+    bh.customer_no AS customer_no,
+    bmdn.display_name_short AS customer,
+
+    bh.BoardHH AS group_cust_no,
+    hhdn.display_name AS group_cust_name,
+
+    th.perf_dt AS date,
+    CAST(th.perf_code AS varchar(50)) AS type,
+    LTRIM(RTRIM(CONCAT(
+        ISNULL(th.perf_name, ''),
+        CASE WHEN th.theater_desc IS NULL OR LTRIM(RTRIM(th.theater_desc)) = '' THEN '' ELSE CONCAT(' - ', th.theater_desc) END,
+        CASE WHEN th.location    IS NULL OR LTRIM(RTRIM(th.location))    = '' THEN '' ELSE CONCAT(' - ', th.location)    END
+    ))) AS description,
+    CAST(NULL AS int) AS worker_no,
+    CAST(NULL AS varchar(200)) AS worker_name
+FROM VS_ELEMENTS_TICKET_HISTORY th
+INNER JOIN BoardHH bh
+    ON bh.BoardIndvAffil = th.customer_no
+LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
+    ON bmdn.customer_no = bh.customer_no
+LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
+    ON hhdn.customer_no = bh.BoardHH
+WHERE
+    th.perf_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+    AND th.perf_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
 )
 
 -- final select: all engagement rows, plus one "NO_RECENT_ACTIVITY" row per board member with no rows above
