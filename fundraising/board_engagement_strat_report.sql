@@ -14,16 +14,27 @@
  * Created: 2025-11-25
  *
  * EDITS:
- *   2025-12-02 FOC - Added group_cust_no / group_cust_name using expanded household logic
- *   2025-12-17 BMR - Added in Performances to the report VS_ELEMENTS_TICKET_HISTORY and solidified date-window documentation across all UNION blocks, looks at previous month
+ *  2025-12-02 FOC - Added group_cust_no / group_cust_name using expanded household logic
+ *  2025-12-17 BMR - Added in Performances to the report VS_ELEMENTS_TICKET_HISTORY and solidified date-window documentation across all UNION blocks, looks at previous month
+ *	2025-12-17 BMR - Added Michael Amoroso to list of Strat leaders and listed names next to all strat leader work ID's for easier reading
  */
 
+USE impresario;
+GO
 
 WITH ETeam AS (
     SELECT *
     FROM VS_WORKER_LIST
     WHERE worker_customer_no IN (
-        900260, 917615, 900573, 1177448, 1365981, 468270, 845135, 652225
+        900260 --Laura Colony (SVP, A&I)
+		, 917615 -- Erica Wolff (SVP, A&I)
+		, 900573 --Shanta Thake (EVP, Chief Artistic Officer)
+		, 1177448 --Jim O'Hara (EVP, CFO)
+		, 1365981 --Mariko Silver (President and CEO)
+		, 468270 --Lauren Klein (EVP, General Counsel)
+		, 845135 --Melique Jones (EVP, Chief People Officer)
+		, 652225 --Leah Johnson (EVP, Chief Communications and Marketing Officer)
+		, 1540367 --Michael Amoroso (SVP, Chief Technology & Digital Officer)
     )
 ),
 Names AS (
