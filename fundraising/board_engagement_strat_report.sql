@@ -17,7 +17,7 @@
  *  2025-12-02 FOC - Added group_cust_no / group_cust_name using expanded household logic
  *  2025-12-17 BMR - Added in Performances to the report VS_ELEMENTS_TICKET_HISTORY and solidified date-window documentation across all UNION blocks, looks at previous month
  *	2025-12-17 BMR - Added Michael Amoroso to list of Strat leaders and listed names next to all strat leader work ID's for easier reading
- *  2026-01-12 BMR - Added Logic to allow special activities with ANY worker, not just STRAT team members, ticketing concierge, Bob, was being tagged as the worker, and data was being surpressed
+ *  2026-01-12 BMR - Added Logic to allow special activities with ANY worker, not just STRAT team members, ticketing concierge, Bob, was being tagged as the worker, and data was being surpressed, Also added 'perf' column into concat for SpecAct
  */
 
 USE impresario;
@@ -157,6 +157,8 @@ Engagement AS (
                 ELSE sa_ref.description
             END,
             ' - ',
+			sa.perf,
+			' - ',
             sas.description,
             ' - ',
             sa.notes
@@ -301,6 +303,8 @@ Engagement AS (
                 ELSE sa_ref.description
             END,
             ' - ',
+			sa.perf,
+			' - ',
             sas.description,
             ' - ',
             sa.notes
@@ -447,6 +451,8 @@ Engagement AS (
                 ELSE sa_ref.description
             END,
             ' - ',
+			sa.perf,
+			' - ',
             sas.description,
             ' - ',
             sa.notes
