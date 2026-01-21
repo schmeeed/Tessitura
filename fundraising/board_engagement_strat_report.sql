@@ -18,6 +18,7 @@
  *  2025-12-17 BMR - Added in Performances to the report VS_ELEMENTS_TICKET_HISTORY and solidified date-window documentation across all UNION blocks, looks at previous month
  *	2025-12-17 BMR - Added Michael Amoroso to list of Strat leaders and listed names next to all strat leader work ID's for easier reading
  *  2026-01-12 BMR - Added Logic to allow special activities with ANY worker, not just STRAT team members, ticketing concierge, Bob, was being tagged as the worker, and data was being surpressed, Also added 'perf' column into concat for SpecAct
+ *  2026-01-21 BMR - Added prefeix to 'type' column to include source column name next to the id value for easier post report aggregation. Also creates more of a unique key and avoids potential same ID_no across tables 
  */
 
 USE impresario;
@@ -93,7 +94,7 @@ Engagement AS (
         END AS group_cust_name,
 
         s.completed_on_dt AS date,
-        CAST(s.step_type AS varchar(50)) AS type,
+        CONCAT('step_type-',CAST(s.step_type AS varchar(50))) AS type,
         CASE 
             WHEN s.description IS NULL 
                  OR LTRIM(RTRIM(s.description)) = '' 
@@ -149,7 +150,7 @@ Engagement AS (
             END AS group_cust_name,
 
         sa.sp_act_dt AS date,
-        CAST(sa.sp_act AS varchar(50)) AS type,
+        CONCAT('sp_act-',CAST(sa.sp_act AS varchar(50))) AS type,
         CONCAT(
             CASE 
                 WHEN sa_ref.description LIKE 'AICULT%' 
@@ -203,7 +204,7 @@ Engagement AS (
         END AS group_cust_name,
 
         c.event_dt AS date,
-        CAST(ex.evex_no AS varchar(50)) AS type,
+        CONCAT('evex_no-',CAST(ex.evex_no AS varchar(50))) AS type,
         c.description AS description,
         CAST(NULL AS int) AS worker_no,
         CAST(NULL AS varchar(200)) AS worker_name
@@ -244,7 +245,7 @@ Engagement AS (
         END AS group_cust_name,
 
         s.completed_on_dt AS date,
-        CAST(s.step_type AS varchar(50)) AS type,
+        CONCAT('step_type-',CAST(s.step_type AS varchar(50))) AS type,
         CASE 
             WHEN s.description IS NULL 
                  OR LTRIM(RTRIM(s.description)) = '' 
@@ -295,7 +296,7 @@ Engagement AS (
             END AS group_cust_name,
 
         sa.sp_act_dt AS date,
-        CAST(sa.sp_act AS varchar(50)) AS type,
+        CONCAT('sp_act-',CAST(sa.sp_act AS varchar(50))) AS type,
         CONCAT(
             CASE 
                 WHEN sa_ref.description LIKE 'AICULT%' 
@@ -349,7 +350,7 @@ Engagement AS (
         END AS group_cust_name,
 
         c.event_dt AS date,
-        CAST(ex.evex_no AS varchar(50)) AS type,
+        CONCAT('evex_no-',CAST(ex.evex_no AS varchar(50))) AS type,
         c.description AS description,
         CAST(NULL AS int) AS worker_no,
         CAST(NULL AS varchar(200)) AS worker_name
@@ -392,7 +393,7 @@ Engagement AS (
         END AS group_cust_name,
 
         s.completed_on_dt AS date,
-        CAST(s.step_type AS varchar(50)) AS type,
+        CONCAT('step_type-',CAST(s.step_type AS varchar(50))) AS type,
         CASE 
             WHEN s.description IS NULL 
                  OR LTRIM(RTRIM(s.description)) = '' 
@@ -443,7 +444,7 @@ Engagement AS (
             END AS group_cust_name,
 
         sa.sp_act_dt AS date,
-        CAST(sa.sp_act AS varchar(50)) AS type,
+        CONCAT('sp_act-',CAST(sa.sp_act AS varchar(50))) AS type,
         CONCAT(
             CASE 
                 WHEN sa_ref.description LIKE 'AICULT%' 
@@ -497,7 +498,7 @@ Engagement AS (
         END AS group_cust_name,
 
         c.event_dt AS date,
-        CAST(ex.evex_no AS varchar(50)) AS type,
+        CONCAT('evex_no-',CAST(ex.evex_no AS varchar(50))) AS type,
         c.description AS description,
         CAST(NULL AS int) AS worker_no,
         CAST(NULL AS varchar(200)) AS worker_name
@@ -533,7 +534,7 @@ SELECT
     END AS group_cust_name,
 
     th.perf_dt AS date,
-    CAST(th.perf_code AS varchar(50)) AS type,
+    CONCAT('perf_code-',CAST(th.perf_code AS varchar(50))) AS type,
     LTRIM(RTRIM(CONCAT(
         ISNULL(th.perf_name, ''),
         CASE WHEN th.theater_desc IS NULL OR LTRIM(RTRIM(th.theater_desc)) = '' THEN '' ELSE CONCAT(' - ', th.theater_desc) END,
@@ -562,7 +563,7 @@ SELECT
     hhdn.display_name AS group_cust_name,
 
     th.perf_dt AS date,
-    CAST(th.perf_code AS varchar(50)) AS type,
+    CONCAT('perf_code-',CAST(th.perf_code AS varchar(50))) AS type,
     LTRIM(RTRIM(CONCAT(
         ISNULL(th.perf_name, ''),
         CASE WHEN th.theater_desc IS NULL OR LTRIM(RTRIM(th.theater_desc)) = '' THEN '' ELSE CONCAT(' - ', th.theater_desc) END,
@@ -591,7 +592,7 @@ SELECT
     hhdn.display_name AS group_cust_name,
 
     th.perf_dt AS date,
-    CAST(th.perf_code AS varchar(50)) AS type,
+    CONCAT('perf_code-',CAST(th.perf_code AS varchar(50))) AS type,
     LTRIM(RTRIM(CONCAT(
         ISNULL(th.perf_name, ''),
         CASE WHEN th.theater_desc IS NULL OR LTRIM(RTRIM(th.theater_desc)) = '' THEN '' ELSE CONCAT(' - ', th.theater_desc) END,
