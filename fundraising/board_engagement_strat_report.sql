@@ -3,12 +3,13 @@
  * Tessitura v16.x
  *
  * Purpose:
- *   Combines engagement activity across Steps, Special Activities, Event Extracts,
- *   and Ticket History for Board members and their associated households.
- *   Date window used throughout the query:
- *     Start: first day of the previous calendar month (inclusive)
- *     End:   first day of the current calendar month (exclusive)
- *   This represents the full previous calendar month only.
+ *   Combines engagement activity of Board from
+		- Plan & Customer Steps
+		- Special Activities
+		- Galas (Elevated Events)
+		- Ticketed Performances (LCPA and Conciearge Campus Tickets)
+ *   for Board members and their associated households.
+ *   Date window used throughout the query is mainly based on previous month, but slowly introducing logic for entire Fiscal year.
  *
  * Author: Brian Ralston
  * Created: 2025-11-25
@@ -19,10 +20,19 @@
  *	2025-12-17 BMR - Added Michael Amoroso to list of Strat leaders and listed names next to all strat leader work ID's for easier reading
  *  2026-01-12 BMR - Added Logic to allow special activities with ANY worker, not just STRAT team members, ticketing concierge, Bob, was being tagged as the worker, and data was being surpressed, Also added 'perf' column into concat for SpecAct
  *  2026-01-21 BMR - Added prefeix to 'type' column to include source column name next to the id value for easier post report aggregation. Also creates more of a unique key and avoids potential same ID_no across tables 
+ *  2026-01-26 BMR - Added Current FY declare statement, and Expanded Gala Event Attendance for the WHOLE Fiscal year. That data will be filtered out in report to segment gala Attendance for the Whole FY.
  */
 
 USE impresario;
 GO
+
+DECLARE @CurrentFY int =
+    CASE
+        WHEN MONTH(GETDATE()) >= 7 THEN YEAR(GETDATE()) + 1  --BMR 2026-01-23
+        ELSE YEAR(GETDATE())
+    END;
+
+
 
 WITH ETeam AS (
     SELECT *
@@ -204,22 +214,26 @@ Engagement AS (
         END AS group_cust_name,
 
         c.event_dt AS date,
-        CONCAT('evex_no-',CAST(ex.evex_no AS varchar(50))) AS type,
+        CONCAT(c.description, '-' ,es.description) AS type, --BMR 2026-01-23
         c.description AS description,
         CAST(NULL AS int) AS worker_no,
         CAST(NULL AS varchar(200)) AS worker_name
     FROM TX_EVENT_EXTRACT ex
     LEFT JOIN T_CAMPAIGN c
-        ON c.campaign_no = ex.campaign_no
+        ON c.campaign_no = ex.campaign_no 
+	LEFT JOIN TR_INVITATION_STATUS es 
+		on ex.inv_status = es.id --BMR 2026-01-23
     LEFT JOIN Names cust
         ON cust.customer_no = ex.customer_no
     INNER JOIN BoardHH bh
         ON bh.customer_no = ex.customer_no
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
         ON hhdn.customer_no = bh.BoardHH       -- HH Display Name
-    WHERE
-        c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
-        AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+	WHERE
+		CASE
+			WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
+			ELSE YEAR(c.event_dt)
+		END = @CurrentFY --BMR 2026-01-23
 
     -- now do all the same stuff, just for the Board HH
 
@@ -350,13 +364,15 @@ Engagement AS (
         END AS group_cust_name,
 
         c.event_dt AS date,
-        CONCAT('evex_no-',CAST(ex.evex_no AS varchar(50))) AS type,
+        CONCAT(c.description, '-' ,es.description) AS type, --BMR 2026-01-23
         c.description AS description,
         CAST(NULL AS int) AS worker_no,
         CAST(NULL AS varchar(200)) AS worker_name
     FROM TX_EVENT_EXTRACT ex
     LEFT JOIN T_CAMPAIGN c
         ON c.campaign_no = ex.campaign_no
+	LEFT JOIN TR_INVITATION_STATUS es 
+		on ex.inv_status = es.id --BMR 2026-01-23
     LEFT JOIN Names cust
         ON cust.customer_no = ex.customer_no
     INNER JOIN BoardHH bh
@@ -365,9 +381,11 @@ Engagement AS (
         ON hhdn.customer_no = bh.BoardHH   -- HH display name
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no    -- BRD Memb Display Name
-    WHERE
-        c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
-        AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+	WHERE
+		CASE
+			WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
+			ELSE YEAR(c.event_dt)
+		END = @CurrentFY --BMR 2026-01-23
 
     UNION ALL 
 
@@ -498,13 +516,15 @@ Engagement AS (
         END AS group_cust_name,
 
         c.event_dt AS date,
-        CONCAT('evex_no-',CAST(ex.evex_no AS varchar(50))) AS type,
+        CONCAT(c.description, '-' ,es.description) AS type, --BMR 2026-01-23
         c.description AS description,
         CAST(NULL AS int) AS worker_no,
         CAST(NULL AS varchar(200)) AS worker_name
     FROM TX_EVENT_EXTRACT ex
     LEFT JOIN T_CAMPAIGN c
         ON c.campaign_no = ex.campaign_no
+	LEFT JOIN TR_INVITATION_STATUS es 
+		on ex.inv_status = es.id --BMR 2026-01-23
     LEFT JOIN Names cust
         ON cust.customer_no = ex.customer_no
     INNER JOIN BoardHH bh
@@ -513,9 +533,11 @@ Engagement AS (
         ON hhdn.customer_no = bh.BoardHH   -- HH display name
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
-    WHERE
-        c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
-        AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+	WHERE
+		CASE
+			WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
+			ELSE YEAR(c.event_dt)
+		END = @CurrentFY --BMR 2026-01-23
 UNION ALL
 
 SELECT
