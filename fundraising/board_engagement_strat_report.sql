@@ -20,7 +20,8 @@
  *	2025-12-17 BMR - Added Michael Amoroso to list of Strat leaders and listed names next to all strat leader work ID's for easier reading
  *  2026-01-12 BMR - Added Logic to allow special activities with ANY worker, not just STRAT team members, ticketing concierge, Bob, was being tagged as the worker, and data was being surpressed, Also added 'perf' column into concat for SpecAct
  *  2026-01-21 BMR - Added prefeix to 'type' column to include source column name next to the id value for easier post report aggregation. Also creates more of a unique key and avoids potential same ID_no across tables 
- *  2026-01-26 BMR - Added Current FY declare statement, and Expanded Gala Event Attendance for the WHOLE Fiscal year. That data will be filtered out in report to segment gala Attendance for the Whole FY.
+ *  2026-01-23 BMR - Added Current FY declare statement, and Expanded Gala Event Attendance for the WHOLE Fiscal year. That data will be filtered out in report to segment gala Attendance for the Whole FY.
+ *  2026-01-27 BMR - Added all open board gift asks steps into STEPS WHERE clauses - ALSO added 12 months of special Acitivities for a 12-month total of cultivation events for each board member - ALSO Fixed EVENT description CONCAT and added in 12 months of EVENT instead of only this FY
  */
 
 USE impresario;
@@ -136,9 +137,15 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
         ON hhdn.customer_no = bh.BoardHH       -- HH Display Name
     WHERE
-        s.completed_on_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+        (
+		s.completed_on_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
         AND s.completed_on_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
+		)OR(
+		p.status IN(14,24)--Ask Statuses(5a and 5b)
+		AND s.step_type IN (28,29,34,40)--Ask Step Types
+		AND s.step_dt <= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
 
     UNION ALL
 
@@ -192,7 +199,7 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
         ON hhdn.customer_no = bh.BoardHH       -- HH Display Name
     WHERE
-        sa.sp_act_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+        sa.sp_act_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
         AND sa.sp_act_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
         --AND (e.worker_customer_no IS NOT NULL OR sa.worker_customer_no IS NULL) -- 2026-01-12 Removing STRAT team worker requirement for Special Activities. 
 
@@ -214,8 +221,8 @@ Engagement AS (
         END AS group_cust_name,
 
         c.event_dt AS date,
-        CONCAT(c.description, '-' ,es.description) AS type, --BMR 2026-01-23
-        c.description AS description,
+        CONCAT('evex_no-',CAST(ex.evex_no as varchar(50))) AS type, --BMR 2026-01-23 --BMR 2026-01-27
+		CONCAT(c.description, '-' ,es.description) AS description, --BMR 2026-01-27
         CAST(NULL AS int) AS worker_no,
         CAST(NULL AS varchar(200)) AS worker_name
     FROM TX_EVENT_EXTRACT ex
@@ -230,10 +237,13 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
         ON hhdn.customer_no = bh.BoardHH       -- HH Display Name
 	WHERE
-		CASE
-			WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
-			ELSE YEAR(c.event_dt)
-		END = @CurrentFY --BMR 2026-01-23
+        c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
+        AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+		
+		--CASE
+		--	WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
+		--	ELSE YEAR(c.event_dt)
+		--END = @CurrentFY --BMR 2026-01-23 --BMR 2026-01-27 --Removed Current Fiscal Year Logic
 
     -- now do all the same stuff, just for the Board HH
 
@@ -288,9 +298,15 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no  -- BRD Memb Display Name
     WHERE
-        s.completed_on_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+        (
+		s.completed_on_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
         AND s.completed_on_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
+		)OR(
+		p.status IN(14,24)--Ask Statuses(5a and 5b)
+		AND s.step_type IN (28,29,34,40)--Ask Step Types
+		AND s.step_dt <= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
 
     UNION ALL
 
@@ -342,7 +358,7 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
     WHERE
-        sa.sp_act_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+        sa.sp_act_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
         AND sa.sp_act_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
         --AND (e.worker_customer_no IS NOT NULL OR sa.worker_customer_no IS NULL) -- 2026-01-12 Removing STRAT team worker requirement for Special Activities. 
 
@@ -364,8 +380,8 @@ Engagement AS (
         END AS group_cust_name,
 
         c.event_dt AS date,
-        CONCAT(c.description, '-' ,es.description) AS type, --BMR 2026-01-23
-        c.description AS description,
+        CONCAT('evex_no-',CAST(ex.evex_no as varchar(50))) AS type, --BMR 2026-01-23 --BMR 2026-01-27
+		CONCAT(c.description, '-' ,es.description) AS description, --BMR 2026-01-27
         CAST(NULL AS int) AS worker_no,
         CAST(NULL AS varchar(200)) AS worker_name
     FROM TX_EVENT_EXTRACT ex
@@ -382,10 +398,13 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no    -- BRD Memb Display Name
 	WHERE
-		CASE
-			WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
-			ELSE YEAR(c.event_dt)
-		END = @CurrentFY --BMR 2026-01-23
+        c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
+        AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+		
+		--CASE
+		--	WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
+		--	ELSE YEAR(c.event_dt)
+		--END = @CurrentFY --BMR 2026-01-23 --BMR 2026-01-27 --Removed Current Fiscal Year Logic
 
     UNION ALL 
 
@@ -440,9 +459,15 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
     WHERE
-        s.completed_on_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+        (
+		s.completed_on_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
         AND s.completed_on_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
+		)OR(
+		p.status IN(14,24)--Ask Statuses(5a and 5b)
+		AND s.step_type IN (28,29,34,40)--Ask Step Types
+		AND s.step_dt <= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
 
     UNION ALL
 
@@ -494,7 +519,7 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
     WHERE
-        sa.sp_act_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+        sa.sp_act_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
         AND sa.sp_act_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
         --AND (e.worker_customer_no IS NOT NULL OR sa.worker_customer_no IS NULL) -- 2026-01-12 Removing STRAT team worker requirement for Special Activities. 
 
@@ -516,8 +541,8 @@ Engagement AS (
         END AS group_cust_name,
 
         c.event_dt AS date,
-        CONCAT(c.description, '-' ,es.description) AS type, --BMR 2026-01-23
-        c.description AS description,
+        CONCAT('evex_no-',CAST(ex.evex_no as varchar(50))) AS type, --BMR 2026-01-23 --BMR 2026-01-27
+		CONCAT(c.description, '-' ,es.description) AS description, --BMR 2026-01-27
         CAST(NULL AS int) AS worker_no,
         CAST(NULL AS varchar(200)) AS worker_name
     FROM TX_EVENT_EXTRACT ex
@@ -534,10 +559,13 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
 	WHERE
-		CASE
-			WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
-			ELSE YEAR(c.event_dt)
-		END = @CurrentFY --BMR 2026-01-23
+        c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
+        AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+		
+		--CASE
+		--	WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
+		--	ELSE YEAR(c.event_dt)
+		--END = @CurrentFY --BMR 2026-01-23 --BMR 2026-01-27 --Removed Current Fiscal Year Logic
 UNION ALL
 
 SELECT
