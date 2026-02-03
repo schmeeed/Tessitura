@@ -1,0 +1,38 @@
+/****************************************************************************************
+-- Purpose       : View for reporting one row per transaction with customer, campaign, appeal, and fund details
+-- Author        : Alyssa Tinsley
+-- Creation Date : 2026-01-29
+-- Edit Log      : 
+--                 
+****************************************************************************************/
+
+--CREATE OR ALTER VIEW vw_transaction_report AS
+SELECT
+    t.transaction_no,
+    c.customer_no,
+    cust.fname,
+	cust.lname,
+    MIN(t.trn_dt) as transaction_date,
+    MIN(t.trn_amt) as transaction_amount,
+    t.trn_type,
+    tr.description,
+    t.campaign_no,
+    camp.description,
+    camp.category,
+    t.appeal_no,
+    app.description,
+    t.fund_no,
+    f.description
+FROM T_TRANSACTION t
+JOIN TR_TRANSACTION_TYPE tr
+    ON t.trn_type = tr.id
+LEFT JOIN T_CONTRIBUTION c
+    ON t.ref_no = c.ref_no
+LEFT JOIN T_CUSTOMER cust
+    ON c.customer_no = cust.customer_no
+LEFT JOIN T_CAMPAIGN camp
+    ON t.campaign_no = camp.campaign_no
+LEFT JOIN T_APPEAL app
+    ON t.appeal_no = app.appeal_no
+LEFT JOIN T_FUND f
+    ON t.fund_no = f.fund_no;
