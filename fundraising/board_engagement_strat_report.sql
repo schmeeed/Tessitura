@@ -32,6 +32,9 @@ DECLARE @CurrentFY int =
         WHEN MONTH(GETDATE()) >= 7 THEN YEAR(GETDATE()) + 1  --BMR 2026-01-23
         ELSE YEAR(GETDATE())
     END;
+DECLARE @PrevMonthStart datetime = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0);
+DECLARE @PrevMonthEnd datetime = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0);
+DECLARE @Rolling12Start datetime = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0);
 
 
 
@@ -138,13 +141,13 @@ Engagement AS (
         ON hhdn.customer_no = bh.BoardHH       -- HH Display Name
     WHERE
         (
-		s.completed_on_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
-        AND s.completed_on_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+		s.completed_on_dt >= @PrevMonthStart
+        AND s.completed_on_dt <  @PrevMonthEnd
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
 		)OR(
 		p.status IN(14,24)--Ask Statuses(5a and 5b)
 		AND s.step_type IN (28,29,34,40)--Ask Step Types
-		AND s.step_dt <= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+		AND s.step_dt <= @PrevMonthStart
 		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
 
     UNION ALL
@@ -199,8 +202,8 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
         ON hhdn.customer_no = bh.BoardHH       -- HH Display Name
     WHERE
-        sa.sp_act_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
-        AND sa.sp_act_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+        sa.sp_act_dt >= @Rolling12Start -- BMR 2026-01-27
+        AND sa.sp_act_dt <  @PrevMonthEnd
         --AND (e.worker_customer_no IS NOT NULL OR sa.worker_customer_no IS NULL) -- 2026-01-12 Removing STRAT team worker requirement for Special Activities. 
 
     UNION ALL
@@ -237,8 +240,8 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
         ON hhdn.customer_no = bh.BoardHH       -- HH Display Name
 	WHERE
-        c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
-        AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+        c.event_dt >= @Rolling12Start -- BMR 2026-01-27
+        AND c.event_dt <  @PrevMonthEnd
 		
 		--CASE
 		--	WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
@@ -299,13 +302,13 @@ Engagement AS (
         ON bmdn.customer_no = bh.customer_no  -- BRD Memb Display Name
     WHERE
         (
-		s.completed_on_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
-        AND s.completed_on_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+		s.completed_on_dt >= @PrevMonthStart
+        AND s.completed_on_dt <  @PrevMonthEnd
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
 		)OR(
 		p.status IN(14,24)--Ask Statuses(5a and 5b)
 		AND s.step_type IN (28,29,34,40)--Ask Step Types
-		AND s.step_dt <= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+		AND s.step_dt <= @PrevMonthStart
 		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
 
     UNION ALL
@@ -358,8 +361,8 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
     WHERE
-        sa.sp_act_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
-        AND sa.sp_act_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+        sa.sp_act_dt >= @Rolling12Start -- BMR 2026-01-27
+        AND sa.sp_act_dt <  @PrevMonthEnd
         --AND (e.worker_customer_no IS NOT NULL OR sa.worker_customer_no IS NULL) -- 2026-01-12 Removing STRAT team worker requirement for Special Activities. 
 
     UNION ALL
@@ -398,8 +401,8 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no    -- BRD Memb Display Name
 	WHERE
-        c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
-        AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+        c.event_dt >= @Rolling12Start -- BMR 2026-01-27
+        AND c.event_dt <  @PrevMonthEnd
 		
 		--CASE
 		--	WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
@@ -460,13 +463,13 @@ Engagement AS (
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
     WHERE
         (
-		s.completed_on_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
-        AND s.completed_on_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+		s.completed_on_dt >= @PrevMonthStart
+        AND s.completed_on_dt <  @PrevMonthEnd
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
 		)OR(
 		p.status IN(14,24)--Ask Statuses(5a and 5b)
 		AND s.step_type IN (28,29,34,40)--Ask Step Types
-		AND s.step_dt <= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
+		AND s.step_dt <= @PrevMonthStart
 		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
 
     UNION ALL
@@ -519,8 +522,8 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
     WHERE
-        sa.sp_act_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
-        AND sa.sp_act_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+        sa.sp_act_dt >= @Rolling12Start -- BMR 2026-01-27
+        AND sa.sp_act_dt <  @PrevMonthEnd
         --AND (e.worker_customer_no IS NOT NULL OR sa.worker_customer_no IS NULL) -- 2026-01-12 Removing STRAT team worker requirement for Special Activities. 
 
     UNION ALL
@@ -559,8 +562,8 @@ Engagement AS (
     LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
 	WHERE
-        c.event_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0) -- BMR 2026-01-27
-        AND c.event_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+        c.event_dt >= @Rolling12Start -- BMR 2026-01-27
+        AND c.event_dt <  @PrevMonthEnd
 		
 		--CASE
 		--	WHEN MONTH(c.event_dt) >= 7 THEN YEAR(c.event_dt) + 1
@@ -600,8 +603,8 @@ LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
 LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
     ON hhdn.customer_no = bh.BoardHH
 WHERE
-    th.perf_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
-    AND th.perf_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+    th.perf_dt >= @PrevMonthStart
+    AND th.perf_dt <  @PrevMonthEnd
 UNION ALL
 
 SELECT
@@ -629,8 +632,8 @@ LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
 LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
     ON hhdn.customer_no = bh.BoardHH
 WHERE
-    th.perf_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
-    AND th.perf_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+    th.perf_dt >= @PrevMonthStart
+    AND th.perf_dt <  @PrevMonthEnd
 UNION ALL
 
 SELECT
@@ -658,8 +661,8 @@ LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
 LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
     ON hhdn.customer_no = bh.BoardHH
 WHERE
-    th.perf_dt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)
-    AND th.perf_dt <  DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+    th.perf_dt >= @PrevMonthStart
+    AND th.perf_dt <  @PrevMonthEnd
 )
 
 -- final select: all engagement rows, plus one "NO_RECENT_ACTIVITY" row per board member with no rows above
