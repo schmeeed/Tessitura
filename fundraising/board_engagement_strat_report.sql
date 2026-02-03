@@ -22,6 +22,7 @@
  *  2026-01-21 BMR - Added prefeix to 'type' column to include source column name next to the id value for easier post report aggregation. Also creates more of a unique key and avoids potential same ID_no across tables 
  *  2026-01-23 BMR - Added Current FY declare statement, and Expanded Gala Event Attendance for the WHOLE Fiscal year. That data will be filtered out in report to segment gala Attendance for the Whole FY.
  *  2026-01-27 BMR - Added all open board gift asks steps into STEPS WHERE clauses - ALSO added 12 months of special Acitivities for a 12-month total of cultivation events for each board member - ALSO Fixed EVENT description CONCAT and added in 12 months of EVENT instead of only this FY
+ *  2026-02-03 BMR - Added variables for date ranges as declare statements at beginning
  */
 
 USE impresario;
