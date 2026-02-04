@@ -26,13 +26,13 @@ SELECT
 FROM T_TRANSACTION t
 JOIN TR_TRANSACTION_TYPE tr
     ON t.trn_type = tr.id
-LEFT JOIN T_CONTRIBUTION c
+JOIN T_CONTRIBUTION c
     ON t.ref_no = c.ref_no
-LEFT JOIN T_CUSTOMER cust
+JOIN T_CUSTOMER cust
     ON c.customer_no = cust.customer_no
-LEFT JOIN T_CAMPAIGN camp
+JOIN T_CAMPAIGN camp
     ON t.campaign_no = camp.campaign_no
-LEFT JOIN T_APPEAL app
+JOIN T_APPEAL app
     ON t.appeal_no = app.appeal_no
-LEFT JOIN T_FUND f
+JOIN T_FUND f
     ON t.fund_no = f.fund_no;
