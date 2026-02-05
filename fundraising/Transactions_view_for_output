@@ -6,7 +6,7 @@
 --                 
 ****************************************************************************************/
 
---CREATE OR ALTER VIEW vw_transaction_report AS
+--CREATE OR ALTER VIEW LV_TRANSACTION_W_CUST AS
 SELECT
     t.transaction_no,
     c.customer_no,
