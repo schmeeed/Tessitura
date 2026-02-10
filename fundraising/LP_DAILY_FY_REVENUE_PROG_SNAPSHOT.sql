@@ -1,3 +1,33 @@
+/*
+Daily Revenue Progress Snapshot Procedure
+Tessitura v16.x
+
+#Background 
+In Feb 2026, the LCPA A&I team requested a means of capturing point-in-time fundraising progress reflected in our department dashboard in Tessitura Analytics. Because some fields used to calculate our “Secured” (but not booked in Tessitura Contributions) and “Projected” revenue in Tessitura Plans are not audited when changes are made, this is the only way of doing point-in-time reporting. 
+These 3 values are logged for point-in-time analysis
+1. Contributions: which comes from the T_CONTRIBUTION table and as part of our business practice is inclusive of Cash and Contracted Pledges
+2. Secured: which comes from the T_PLAN table and as part of our business practice is inclusive of Cash and Contracted Pledges AND verbal pledges
+3. Forecasted: which comes from the T_PLAN table and is inclusive of Cash, Contracted Pledges, verbal pledges, Weighted Asks, Weighted Cultivation Pipeline, and Weighted Prospect Pipeline
+
+This is done with the following database objects: 
+ - Nightly job called Nightly - Update Revenue Prog to execute custom stored procedure 
+ - Custom stored procedure LP_DAILY_FY_REVENUE_PROG_SNAPSHOT populates custom table LT_DAILY_FY_REVENUE_PROG, with results of SELECT statements 
+ - Custom table LT_DAILY_FY_REVENUE_PROG, which is the basis for a custom report 
+ 
+
+#Processing Logic  
+
+The custom stored procedure adds a row to the custom table every time it is run for a given date. 	 
+The purpose of the procedure is to find the total contributions, secured revenue, and projected revenue (secured + [plan goal * plan probability]) for the current date, so we can take a snapshot of it. 
+Logic from this procedure effectively mimics the logic in the annual Tessitura Analytics dashboard called A&I Department Dashboard, in the chart called Projections by Team *NEW*. 
+
+Author: Brian Ralston
+Created: 2026-02-05
+EDITS:
+
+ */
+
+
 CREATE OR ALTER PROCEDURE dbo.LP_DAILY_FY_REVENUE_PROG_SNAPSHOT
 AS
 BEGIN
