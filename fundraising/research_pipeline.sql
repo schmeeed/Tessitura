@@ -43,7 +43,6 @@ SELECT DISTINCT
 
 FROM T_PLAN p
 
--- Who the plan is for
 JOIN T_CUSTOMER c 
     ON p.customer_no = c.customer_no
 
@@ -68,16 +67,16 @@ JOIN T_CUSTOMER wc
     ON w.customer_no = wc.customer_no
 
 WHERE 
-    -- Only plans created by your four users
+    -- Only plans created by research
     p.created_by IN ('ktobaygo','rmeriam','ehensche','jelopez')
 
     AND (
         -- Updated by someone else
         p.last_updated_by NOT IN ('ktobaygo','rmeriam','ehensche','jelopez')
 
-        -- OR has a worker who is not a creator
+        -- OR has a worker who is not research
         OR w.customer_no NOT IN (1401257,1442925,1446664,1446868)
     )
 
-    -- Only show workers that are not creators in the output
+    -- Only show workers that are research in the output
     AND w.customer_no NOT IN (1401257,1442925,1446664,1446868)
