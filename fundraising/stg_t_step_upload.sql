@@ -17,7 +17,6 @@ Usage:
     4. Approved records are inserted into T_STEP.
 
 Notes:
-    - step_no is NOT included here.
     - Audit fields (create_dt, created_by, etc.) are system generated at insert time.
     - Exactly ONE of plan_no, activity_no, or customer_no must be populated.
 *****************************************************************************************/
