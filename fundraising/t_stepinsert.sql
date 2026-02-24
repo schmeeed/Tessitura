@@ -24,7 +24,7 @@ declare tstep_cursor cursor for
 select 
     plan_no, step_dt, step_type, description, notes, associate_no, due_dt, completed_on_dt,
     warning_days, priority, old_value, new_value, worker_customer_no, activity_no, customer_no, cyclical_ind
-from amt_tstepimport_20260220
+from [INSERT NAME OF FLAT FILE HERE]
 
 open tstep_cursor
 
@@ -59,3 +59,9 @@ end
 
 close tstep_cursor
 deallocate tstep_cursor
+
+
+    --to double check
+select top 10*
+from t_step
+order by create_dt desc;
