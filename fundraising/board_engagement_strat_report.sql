@@ -155,12 +155,13 @@ Engagement AS (
         (
 		s.completed_on_dt >= @FYStart --AMT 2026-03-19
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
-		)OR(
-		p.status IN(14,24)--Ask Statuses(5a and 5b)
-		AND s.step_type IN (28,29,34,40)--Ask Step Types
-		AND s.step_dt <= @FYStart
-		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
-
+		)
+	--OR(
+		--p.status IN(14,24)--Ask Statuses(5a and 5b)
+		--AND s.step_type IN (28,29,34,40)--Ask Step Types
+		--AND s.step_dt <= @FYStart
+		--)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
+--BMR 2026-03-19 Removed during troubleshooting
     UNION ALL
 
 /*ACTIVITIES*/
@@ -315,12 +316,12 @@ Engagement AS (
         (
 		s.completed_on_dt >= @FYStart
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
-		)OR(
-		p.status IN(14,24)--Ask Statuses(5a and 5b)
-		AND s.step_type IN (28,29,34,40)--Ask Step Types
-		AND s.step_dt <= @FYStart
-		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
-
+		)--OR(
+		--p.status IN(14,24)--Ask Statuses(5a and 5b)
+		--AND s.step_type IN (28,29,34,40)--Ask Step Types
+		--AND s.step_dt <= @FYStart
+		--)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
+--BMR 2026-03-19 Removed during troubleshooting
     UNION ALL
 
     SELECT
@@ -475,12 +476,13 @@ Engagement AS (
         (
 		s.completed_on_dt >= @FYStart --AMT 2026-03-19
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
-		)OR(
-		p.status IN(14,24)--Ask Statuses(5a and 5b)
-		AND s.step_type IN (28,29,34,40)--Ask Step Types
-		AND s.step_dt <= @FYStart --AMT 2026-03-19
-		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
-
+		)
+	--OR(
+	--	p.status IN(14,24)--Ask Statuses(5a and 5b)
+	---	AND s.step_type IN (28,29,34,40)--Ask Step Types
+	--	AND s.step_dt <= @FYStart --AMT 2026-03-19
+	--	)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
+--BMR 2026-03-19 Removed during troubleshooting
     UNION ALL
 
     SELECT
