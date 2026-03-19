@@ -23,6 +23,7 @@
  *  2026-01-23 BMR - Added Current FY declare statement, and Expanded Gala Event Attendance for the WHOLE Fiscal year. That data will be filtered out in report to segment gala Attendance for the Whole FY.
  *  2026-01-27 BMR - Added all open board gift asks steps into STEPS WHERE clauses - ALSO added 12 months of special Acitivities for a 12-month total of cultivation events for each board member - ALSO Fixed EVENT description CONCAT and added in 12 months of EVENT instead of only this FY
  *  2026-02-03 BMR - Added variables for date ranges as declare statements at beginning
+ *  2026-03-19 AMT - Added variables for rolling FY start as declare statements at beginning and replaced any PrevMonthStart variables
  */
 
 USE impresario;
@@ -36,6 +37,15 @@ DECLARE @CurrentFY int =
 DECLARE @PrevMonthStart datetime = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0);
 DECLARE @PrevMonthEnd datetime = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0);
 DECLARE @Rolling12Start datetime = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 12, 0);
+DECLARE @FYStart datetime =
+    DATEFROMPARTS(
+        CASE 
+            WHEN MONTH(GETDATE()) >= 7 THEN YEAR(GETDATE())
+            ELSE YEAR(GETDATE()) - 1
+        END,
+        7, 1
+    ); --AMT 2026-03-19
+
 
 
 
@@ -52,6 +62,7 @@ WITH ETeam AS (
 		, 845135 --Melique Jones (EVP, Chief People Officer)
 		, 652225 --Leah Johnson (EVP, Chief Communications and Marketing Officer)
 		, 1540367 --Michael Amoroso (SVP, Chief Technology & Digital Officer)
+		, 475123 --Jordana Leigh (SVP, Programming)
     )
 ),
 Names AS (
@@ -142,13 +153,12 @@ Engagement AS (
         ON hhdn.customer_no = bh.BoardHH       -- HH Display Name
     WHERE
         (
-		s.completed_on_dt >= @PrevMonthStart
-        AND s.completed_on_dt <  @PrevMonthEnd
+		s.completed_on_dt >= @FYStart --AMT 2026-03-19
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
 		)OR(
 		p.status IN(14,24)--Ask Statuses(5a and 5b)
 		AND s.step_type IN (28,29,34,40)--Ask Step Types
-		AND s.step_dt <= @PrevMonthStart
+		AND s.step_dt <= @FYStart
 		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
 
     UNION ALL
@@ -303,13 +313,12 @@ Engagement AS (
         ON bmdn.customer_no = bh.customer_no  -- BRD Memb Display Name
     WHERE
         (
-		s.completed_on_dt >= @PrevMonthStart
-        AND s.completed_on_dt <  @PrevMonthEnd
+		s.completed_on_dt >= @FYStart
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
 		)OR(
 		p.status IN(14,24)--Ask Statuses(5a and 5b)
 		AND s.step_type IN (28,29,34,40)--Ask Step Types
-		AND s.step_dt <= @PrevMonthStart
+		AND s.step_dt <= @FYStart
 		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
 
     UNION ALL
@@ -464,13 +473,12 @@ Engagement AS (
         ON bmdn.customer_no = bh.customer_no        -- BRD Memb Display Name
     WHERE
         (
-		s.completed_on_dt >= @PrevMonthStart
-        AND s.completed_on_dt <  @PrevMonthEnd
+		s.completed_on_dt >= @FYStart --AMT 2026-03-19
         AND (e.worker_customer_no IS NOT NULL OR s.worker_customer_no IS NULL)
 		)OR(
 		p.status IN(14,24)--Ask Statuses(5a and 5b)
 		AND s.step_type IN (28,29,34,40)--Ask Step Types
-		AND s.step_dt <= @PrevMonthStart
+		AND s.step_dt <= @FYStart --AMT 2026-03-19
 		)--BMR 2026-01-27 SELECT * FROM TR_PLAN_STATUS
 
     UNION ALL
@@ -604,8 +612,7 @@ LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
 LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
     ON hhdn.customer_no = bh.BoardHH
 WHERE
-    th.perf_dt >= @PrevMonthStart
-    AND th.perf_dt <  @PrevMonthEnd
+    th.perf_dt >= @FYStart
 UNION ALL
 
 SELECT
@@ -633,8 +640,7 @@ LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
 LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
     ON hhdn.customer_no = bh.BoardHH
 WHERE
-    th.perf_dt >= @PrevMonthStart
-    AND th.perf_dt <  @PrevMonthEnd
+    th.perf_dt >= @FYStart
 UNION ALL
 
 SELECT
@@ -662,8 +668,7 @@ LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() bmdn
 LEFT OUTER JOIN FT_CONSTITUENT_DISPLAY_NAME() hhdn
     ON hhdn.customer_no = bh.BoardHH
 WHERE
-    th.perf_dt >= @PrevMonthStart
-    AND th.perf_dt <  @PrevMonthEnd
+    th.perf_dt >= @FYStart
 )
 
 -- final select: all engagement rows, plus one "NO_RECENT_ACTIVITY" row per board member with no rows above
