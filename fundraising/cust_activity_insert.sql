@@ -13,11 +13,6 @@ declare
     @issue_dt datetime,
     @urg_ind char(1),
     @origin varchar(50),
-    @create_loc varchar(50),
-    @created_by varchar(50),
-    @create_dt datetime,
-    @last_updated_by varchar(50),
-    @last_update_dt datetime,
     @perf_no int,
     @pkg_no int,
     @closed_ind char(1)
@@ -35,11 +30,6 @@ select
     issue_dt,
     urg_ind,
     origin,
-    create_loc,
-    created_by,
-    create_dt,
-    last_updated_by,
-    last_update_dt,
     perf_no,
     pkg_no,
     closed_ind
@@ -59,11 +49,6 @@ fetch next from tactivity_cursor into
     @issue_dt,
     @urg_ind,
     @origin,
-    @create_loc,
-    @created_by,
-    @create_dt,
-    @last_updated_by,
-    @last_update_dt,
     @perf_no,
     @pkg_no,
     @closed_ind
@@ -71,7 +56,7 @@ fetch next from tactivity_cursor into
 while @@fetch_status = 0
 begin
 
-    -- If activity_no should be system-generated, uncomment below and remove from insert
+    -- If activity_no should be system-generated, uncomment below
     -- exec @activity_no = ap_get_nextid_function 'AC', 1  
 
     insert into T_CUST_ACTIVITY
@@ -87,11 +72,6 @@ begin
         issue_dt,
         urg_ind,
         origin,
-        create_loc,
-        created_by,
-        create_dt,
-        last_updated_by,
-        last_update_dt,
         perf_no,
         pkg_no,
         closed_ind
@@ -109,11 +89,6 @@ begin
         @issue_dt,
         @urg_ind,
         @origin,
-        @create_loc,
-        @created_by,
-        @create_dt,
-        @last_updated_by,
-        @last_update_dt,
         @perf_no,
         @pkg_no,
         @closed_ind
@@ -131,11 +106,6 @@ begin
         @issue_dt,
         @urg_ind,
         @origin,
-        @create_loc,
-        @created_by,
-        @create_dt,
-        @last_updated_by,
-        @last_update_dt,
         @perf_no,
         @pkg_no,
         @closed_ind
@@ -149,4 +119,4 @@ deallocate tactivity_cursor
 -- to double check
 select top 10 *
 from T_CUST_ACTIVITY
-order by create_dt desc;
+order by issue_dt desc;
