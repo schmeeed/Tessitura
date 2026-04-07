@@ -32,7 +32,7 @@ select
     perf_no,
     pkg_no,
     closed_ind
-from amt_csiinsert_20260407
+from [FILE NAME HERE]
 
 open tactivity_cursor
 
