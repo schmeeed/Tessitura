@@ -19,7 +19,6 @@ declare
 
 declare tactivity_cursor cursor for
 select 
-    activity_no,
     category,
     activity_type,
     customer_no,
@@ -33,12 +32,11 @@ select
     perf_no,
     pkg_no,
     closed_ind
-from [INSERT NAME OF FLAT FILE HERE]
+from [FILE NAME HERE]
 
 open tactivity_cursor
 
 fetch next from tactivity_cursor into
-    @activity_no,
     @category,
     @activity_type,
     @customer_no,
@@ -57,7 +55,7 @@ while @@fetch_status = 0
 begin
 
     -- If activity_no should be system-generated, uncomment below
-    -- exec @activity_no = ap_get_nextid_function 'AC', 1  
+    exec @activity_no = ap_get_nextid_function 'AC', 1  
 
     insert into T_CUST_ACTIVITY
     (
@@ -95,7 +93,6 @@ begin
     )
 
     fetch next from tactivity_cursor into
-        @activity_no,
         @category,
         @activity_type,
         @customer_no,
@@ -119,4 +116,4 @@ deallocate tactivity_cursor
 -- to double check
 select top 10 *
 from T_CUST_ACTIVITY
-order by issue_dt desc;
+order by activity_no desc;
