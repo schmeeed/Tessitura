@@ -1,6 +1,8 @@
 use impresario
 go
 
+    begin transaction
+
 declare 
     @step_no int,
     @plan_no int,
@@ -64,4 +66,11 @@ deallocate tstep_cursor
     --to double check
 select top 10*
 from t_step
-order by create_dt desc;
+order by create_dt desc
+
+
+    -- Choose ONE:
+    -- commit transaction
+    -- rollback transaction
+
+go;
