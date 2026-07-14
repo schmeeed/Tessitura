@@ -6,7 +6,7 @@ declare
     @individual_customer_no int,
     @group_customer_no int,
     @affiliation_type_id int,
-    @is_allowed_to_transact int,
+    @is_allowed_to_transact char(1),
     @is_included_in_search_results char(1),
     @title varchar(50),
     @salary money,
@@ -34,7 +34,7 @@ select
     primary_ind,
     name_ind,
     affiliated_name
-from [INSERT NAME OF FLAT FILE HERE]
+from amt_affiliationinsert5_20260714
 
 open taffiliation_cursor
 
@@ -81,12 +81,7 @@ begin
             start_dt,
             end_dt,
             inactive,
-            create_dt,
-            created_by,
-            last_update_dt,
-            last_updated_by,
             primary_ind,
-            create_loc,
             name_ind,
             affiliated_name
         )
@@ -104,12 +99,7 @@ begin
             @start_dt,
             @end_dt,
             @inactive,
-            getdate(),
-            'conversion',
-            getdate(),
-            'conversion',
             @primary_ind,
-            null,
             @name_ind,
             @affiliated_name
         )
